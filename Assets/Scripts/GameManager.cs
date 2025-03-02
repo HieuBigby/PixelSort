@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public static int Rows;
     public static int Cols;
 
-    [SerializeField] private Level _currentlevelData;
+    [SerializeField] private List<Level> _curLevels;
     [SerializeField] private TMP_Text _levelText;
     [SerializeField] private TMP_Text _movesText;
     [SerializeField] private TMP_Text _bestText;
@@ -23,7 +23,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Cell _cellPrefab;
     [SerializeField] private float screenScaleFactor;
     [SerializeField] private float screenHeightRatio;
+    [SerializeField] private RectTransform transNotiFinish;
 
+    private Level _currentlevelData;
     private int levelNum;
     private int moveNum;
     private int bestNum;
@@ -54,10 +56,10 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Rows = _currentlevelData.Row;
-        Cols = _currentlevelData.Col;
+        transNotiFinish.gameObject.SetActive(false);
 
         levelNum = PlayerPrefs.GetInt("Level", 1);
+        LoadLevel(levelNum);
         moveNum = 0;
         bestNum = PlayerPrefs.GetInt("Best" + levelNum.ToString(), 0);
         _levelText.text = levelNum.ToString();
@@ -73,6 +75,22 @@ public class GameManager : MonoBehaviour
         playStartTween.Play();
 
         SpawnCells();
+    }
+
+    private void LoadLevel(int levelNumber)
+    {
+        // Ensure the level number is within the valid range
+        if (levelNumber < 1 || levelNumber > _curLevels.Count)
+        {
+            Debug.LogError($"Level {levelNumber} is out of range. Total levels: {_curLevels.Count}");
+            return;
+        }
+
+        // Access the level data by index (levelNumber - 1 because levelNumber is 1-based)
+        _currentlevelData = _curLevels[levelNumber - 1];
+
+        Rows = _currentlevelData.Row;
+        Cols = _currentlevelData.Col;
     }
 
     private void SpawnCells()
@@ -297,7 +315,10 @@ public class GameManager : MonoBehaviour
         }
         PlayerPrefs.SetInt("Best" + levelNum.ToString(), bestNum);
         _bestText.text = bestNum.ToString();
-        PlayerPrefs.SetInt("Level", levelNum + 1);
+        if (levelNum < _curLevels.Count)
+        {
+            PlayerPrefs.SetInt("Level", levelNum + 1);
+        }
 
         _nextButtonTransform.gameObject.SetActive(true);
         playNextTween = _nextButtonTransform
@@ -327,6 +348,34 @@ public class GameManager : MonoBehaviour
         }
 
         playNextTween.Kill();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        if (levelNum >= _curLevels.Count)
+        {
+            // Show congratulations message
+            ShowCongratulationsMessage();
+        }
+        else
+        {
+            // Load the next level
+            UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        }
+    }
+
+    Tween notiTween;
+    private void ShowCongratulationsMessage()
+    {
+        notiTween?.Complete();
+        transNotiFinish.gameObject.SetActive(true);
+        notiTween = transNotiFinish.DOSizeDelta(new Vector2(transNotiFinish.sizeDelta.x, 800f), 0.5f);
+        notiTween.SetEase(Ease.OutBack);
+        notiTween.Play();
+    }
+
+    public void HideCongratulationsMessage()
+    {
+        notiTween?.Complete();
+        notiTween = transNotiFinish.DOSizeDelta(new Vector2(transNotiFinish.sizeDelta.x, 0f), 0.5f);
+        notiTween.SetEase(Ease.OutBack);
+        notiTween.OnComplete(() => transNotiFinish.gameObject.SetActive(false));
+        notiTween.Play();
     }
 }

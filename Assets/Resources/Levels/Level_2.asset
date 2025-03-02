@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fe1710532e2f6e4ca3ec4899e116dba, type: 3}
+  m_Name: Level_2
+  m_EditorClassIdentifier: 
+  BackGroundColor: {r: 0.4113207, g: 0.4113207, b: 0.4113207, a: 1}
+  ImageSprite: {fileID: 21300000, guid: 41e1efc251b861a47877937186d6fa69, type: 3}
+  Row: 4
+  Col: 4
+  LockedCells: []
