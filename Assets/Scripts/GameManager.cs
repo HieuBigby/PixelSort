@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -18,9 +18,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text _bestText;
     [SerializeField] private Transform _playButtonTransform;
     [SerializeField] private Transform _gridParent;
+    [SerializeField] private Transform _boardRoot;
     [SerializeField] private Transform _nextButtonTransform;
     [SerializeField] private Cell _cellPrefab;
-
+    [SerializeField] private float screenScaleFactor;
+    [SerializeField] private float screenHeightRatio;
 
     private int levelNum;
     private int moveNum;
@@ -35,7 +37,7 @@ public class GameManager : MonoBehaviour
     private Tween playNextTween;
 
     private Cell[,] cells;
-    private Color[,] correctColors;
+    private Cell[,] correctCells;
 
     private Cell selectedCell;
     private Cell movedCell;
@@ -76,36 +78,66 @@ public class GameManager : MonoBehaviour
     private void SpawnCells()
     {
         cells = new Cell[_currentlevelData.Row, _currentlevelData.Col];
-        correctColors = new Color[_currentlevelData.Row, _currentlevelData.Col];
+        correctCells = new Cell[_currentlevelData.Row, _currentlevelData.Col];
 
         Camera.main.backgroundColor = _currentlevelData.BackGroundColor;
+        Sprite[,] imgPieces = SplitImageSprite(_currentlevelData);
+
+        // Lấy Sprite đầu tiên làm chuẩn
+        Sprite sprite = imgPieces[0, 0];
+        float cellWidth = sprite.bounds.size.x;
+        float cellHeight = sprite.bounds.size.y;
+        float totalWidth = Cols * cellWidth;
+        float totalHeight = Rows * cellHeight;
+        float startX = -totalWidth / 2 + cellWidth / 2;
+        float startY = -totalHeight / 2 + cellHeight / 2;
+        _gridParent.transform.localPosition = new Vector3(startX, startY, 0);
+
+        // Calculate the screen width and height in world units
+        float screenWidth = Camera.main.orthographicSize * 2 * Screen.width / Screen.height;
+        float screenHeight = Camera.main.orthographicSize * 2;
+        float scaleFactorWidth = screenWidth / totalWidth;
+        float scaleFactorHeight = screenHeight / totalHeight;
+        float scaleFactor = Mathf.Min(scaleFactorWidth, scaleFactorHeight * screenHeightRatio);
+
+        // Apply the scale factor to the board root
+        _boardRoot.transform.localScale = new Vector3(scaleFactor, scaleFactor, 1) * screenScaleFactor;
 
         for (int x = 0; x < Rows; x++)
         {
             for (int y = 0; y < Cols; y++)
             {
-                float xLerp = (float)y / (Cols - 1);
-                float yLerp = (float)x / (Rows - 1);
-                Color leftColor = Color.Lerp(
-                    _currentlevelData.BottomLeftColor,
-                    _currentlevelData.TopLeftColor,
-                    yLerp
-                    );
-                Color rightColor = Color.Lerp(
-                    _currentlevelData.BottomRightColor,
-                    _currentlevelData.TopRightColor,
-                    yLerp
-                    );
-                Color currentColor = Color.Lerp(
-                    leftColor,
-                    rightColor,
-                    xLerp
-                    );
-                correctColors[x, y] = currentColor;
+                float posX = y * cellWidth;
+                float posY = x * cellHeight;
+
                 cells[x, y] = Instantiate(_cellPrefab, _gridParent);
-                cells[x, y].Init(currentColor, y, x);
+                cells[x, y].Init(imgPieces[x, y], y, x, posX, posY);
+                cells[x, y].name = $"Cell_{x}x{y}";
+                correctCells[x, y] = cells[x, y];
             }
         }
+    }
+
+    public Sprite[,] SplitImageSprite(Level level)
+    {
+        Texture2D texture = level.ImageSprite.texture;
+        int Row = level.Row;
+        int Col = level.Col;
+        int pieceWidth = texture.width / Col;
+        int pieceHeight = texture.height / Row;
+
+        Sprite[,] pieces = new Sprite[Row, Col];
+
+        for (int i = 0; i < Row; i++)
+        {
+            for (int j = 0; j < Col; j++)
+            {
+                Rect rect = new Rect(j * pieceWidth, i * pieceHeight, pieceWidth, pieceHeight);
+                pieces[i, j] = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f));
+            }
+        }
+
+        return pieces;
     }
 
     public void ClickedPlayButton()
@@ -219,10 +251,11 @@ public class GameManager : MonoBehaviour
             if (selectedCell == null) return;
 
             canMove = false;
-            Vector2 pos = (Vector2)selectedCell.gameObject.transform.localPosition +
-                new Vector2(0.5f, 0.5f);
-            int row = (int)pos.y;
-            int col = (int)pos.x;
+
+            Vector3 localPos = selectedCell.gameObject.transform.localPosition;
+            int col = (int)((localPos.x + selectedCell.SpriteWidth / 2) / selectedCell.SpriteWidth);
+            int row = (int)((localPos.y + selectedCell.SpriteHeight / 2) / selectedCell.SpriteHeight);
+
             movedCell = cells[row, col];
             if (_currentlevelData.LockedCells.Contains(new Vector2Int(row, col))
                 || movedCell == selectedCell)
@@ -252,7 +285,7 @@ public class GameManager : MonoBehaviour
         {
             for (int j = 0; j < Cols; j++)
             {
-                if (cells[i, j].Color != correctColors[i, j])
+                if (cells[i, j] != correctCells[i, j])
                     return;
             }
         }

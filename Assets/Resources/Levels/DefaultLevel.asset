@@ -13,22 +13,7 @@ MonoBehaviour:
   m_Name: DefaultLevel
   m_EditorClassIdentifier: 
   BackGroundColor: {r: 1, g: 1, b: 1, a: 1}
-  TopLeftColor: {r: 0.60784316, g: 0.3647059, b: 0.8980393, a: 1}
-  TopRightColor: {r: 0.9450981, g: 0.35686275, b: 0.70980394, a: 1}
-  BottomLeftColor: {r: 0, g: 0.73333335, b: 0.97647065, a: 1}
-  BottomRightColor: {r: 0.9960785, g: 0.8941177, b: 0.2509804, a: 1}
-  Row: 8
-  Col: 8
-  LockedCells:
-  - {x: 0, y: 0}
-  - {x: 1, y: 0}
-  - {x: 0, y: 1}
-  - {x: 0, y: 7}
-  - {x: 0, y: 6}
-  - {x: 1, y: 7}
-  - {x: 7, y: 0}
-  - {x: 7, y: 1}
-  - {x: 6, y: 0}
-  - {x: 7, y: 7}
-  - {x: 7, y: 6}
-  - {x: 6, y: 7}
+  ImageSprite: {fileID: 21300000, guid: d688e367d11bda3459868cdc7a68473f, type: 3}
+  Row: 3
+  Col: 3
+  LockedCells: []

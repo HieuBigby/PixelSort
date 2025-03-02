@@ -5,8 +5,25 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    [HideInInspector] public Color Color;
     [HideInInspector] public Vector2Int Position;
+
+    private Vector3 _transPosition;
+    public Vector3 TransPosition
+    {
+        get
+        {
+            float cellWidth = _bgSprite.sprite.bounds.size.x;
+            float cellHeight = _bgSprite.sprite.bounds.size.y;
+
+            _transPosition.x = Position.x * cellWidth;
+            _transPosition.y = Position.y * cellHeight;
+
+            return _transPosition;
+        }
+    }
+
+    public float SpriteWidth => _bgSprite.sprite.bounds.size.x;
+    public float SpriteHeight => _bgSprite.sprite.bounds.size.y;
 
     public bool IsStartTweenPlaying => startAnimation.IsActive();
     public bool IsStartMovePlaying => startMoveAnimation.IsActive();
@@ -14,6 +31,9 @@ public class Cell : MonoBehaviour
     public bool hasMoveFinished => !moveAnimation.IsActive();
 
     [SerializeField] private SpriteRenderer _bgSprite;
+    [SerializeField] private SpriteRenderer _borderSprite;
+    [SerializeField] private BoxCollider2D _boxCollider;
+    [SerializeField] private float _imgScale = 0.75f;
     [SerializeField] private float _startScaleDelay = 0.04f;
     [SerializeField] private float _startScaleTime = 0.2f;
     [SerializeField] private float _startMoveAnimationTime = 0.32f;
@@ -21,6 +41,7 @@ public class Cell : MonoBehaviour
     [SerializeField] private float _moveAnimationTime = 0.32f;
 
     private Tween startAnimation;
+    private Tween spriteAnimation;
     private Tween startMoveAnimation;
     private Tween selectedMoveAnimation;
     private Tween moveAnimation;
@@ -28,12 +49,15 @@ public class Cell : MonoBehaviour
     private const int FRONT = 1;
     private const int BACK = 0;
 
-    public void Init(Color color, int x, int y)
+    public void Init(Sprite sprite, int x, int y, float posX, float posY)
     {
-        Color = color;
-        _bgSprite.color = Color;
+        _bgSprite.sprite = sprite;
+        _boxCollider.size = _bgSprite.bounds.size;
+        _bgSprite.transform.localScale = Vector3.one * _imgScale;
+        _borderSprite.size = _bgSprite.bounds.size;
+
         Position = new Vector2Int(x, y);
-        transform.localPosition = new Vector3(x, y, 0);
+        transform.localPosition = new Vector3(posX, posY, 0);
         transform.localScale = Vector3.zero;
         float delay = (x + y) * _startScaleDelay;
         startAnimation = transform.DOScale(1f, _startScaleTime);
@@ -45,8 +69,12 @@ public class Cell : MonoBehaviour
     public void GameFinished()
     {
         transform.localScale = Vector3.one;
+        spriteAnimation = _bgSprite.transform.DOScale(1f, _startScaleTime);
+        spriteAnimation.SetEase(Ease.OutSine);
+        spriteAnimation.Play();
+
         float delay = (Position.x + Position.y) * _startScaleDelay;
-        startAnimation = transform.DOScale(0.5f, _startScaleTime);
+        startAnimation = transform.DOScale(0.8f, _startScaleTime);
         startAnimation.SetLoops(2, LoopType.Yoyo);
         startAnimation.SetEase(Ease.InOutExpo);
         startAnimation.SetDelay(0.5f + delay);
@@ -56,7 +84,7 @@ public class Cell : MonoBehaviour
     public void AnimateStartPosition()
     {
         startMoveAnimation = transform.DOLocalMove(
-            new Vector3(Position.x, Position.y, 0), _startMoveAnimationTime);
+            new Vector3(TransPosition.x, TransPosition.y, 0), _startMoveAnimationTime);
         startMoveAnimation.SetEase(Ease.InSine);
         startMoveAnimation.Play();
     }
@@ -69,11 +97,11 @@ public class Cell : MonoBehaviour
 
     public void SelectedMove(Vector2 offset)
     {
-        transform.localPosition = Position + offset;
+        transform.localPosition = TransPosition + (Vector3)offset;
         float minX = 0f;
-        float maxX = GameManager.Cols - 1;
+        float maxX = GameManager.Cols * SpriteHeight - SpriteHeight;
         float minY = 0f;
-        float maxY = GameManager.Rows - 1;
+        float maxY = GameManager.Rows * SpriteWidth - SpriteWidth;
         Vector2 pos = transform.localPosition;
         if (pos.x < minX)
         {
@@ -97,7 +125,7 @@ public class Cell : MonoBehaviour
     public void SelectedMoveEnd()
     {
         selectedMoveAnimation = transform.DOLocalMove(
-            new Vector3(Position.x, Position.y, 0f),
+            new Vector3(TransPosition.x, TransPosition.y, 0f),
             _selectedMoveAnimationTime
             );
         selectedMoveAnimation.onComplete = () =>
@@ -112,7 +140,7 @@ public class Cell : MonoBehaviour
     {
         _bgSprite.sortingOrder = FRONT;
         moveAnimation = transform.DOLocalMove(
-            new Vector3(Position.x, Position.y, 0f),
+            new Vector3(TransPosition.x, TransPosition.y, 0f),
             _moveAnimationTime
             );
         moveAnimation.onComplete = () =>
