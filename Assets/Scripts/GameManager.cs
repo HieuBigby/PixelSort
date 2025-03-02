@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float screenScaleFactor;
     [SerializeField] private float screenHeightRatio;
     [SerializeField] private RectTransform transNotiFinish;
+    [SerializeField] private GameObject objReplayButton;
 
     private Level _currentlevelData;
     private int levelNum;
@@ -60,6 +61,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         transNotiFinish.gameObject.SetActive(false);
+        objReplayButton.SetActive(false);
 
         levelNum = PlayerPrefs.GetInt("Level", 1);
         LoadLevel(levelNum);
@@ -208,6 +210,7 @@ public class GameManager : MonoBehaviour
 
         hasGameStarted = true;
         _playButtonTransform.gameObject.SetActive(false);
+        objReplayButton.SetActive(true);
     }
 
     private void Update()
@@ -368,6 +371,11 @@ public class GameManager : MonoBehaviour
             // Load the next level
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         }
+    }
+
+    public void ClickedReplayButton()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
     Tween notiTween;
