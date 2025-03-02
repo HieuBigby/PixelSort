@@ -34,6 +34,8 @@ public class GameManager : MonoBehaviour
     private bool hasGameFinished;
     private bool canMove;
     private bool canStartClicking;
+    private float clickCooldown = 0.3f; // Cooldown period in seconds
+    private float lastClickTime;
 
     private Tween playStartTween;
     private Tween playNextTween;
@@ -52,6 +54,7 @@ public class GameManager : MonoBehaviour
         canMove = false;
         canStartClicking = false;
         hasGameStarted = false;
+        lastClickTime = -clickCooldown; // Initialize to allow immediate first click
     }
 
     private void Start()
@@ -229,7 +232,7 @@ public class GameManager : MonoBehaviour
 
         if (!canMove)
         {
-            if (selectedCell.hasSelectedMoveFinished && movedCell.hasMoveFinished)
+            if (!selectedCell.IsAnimating && !movedCell.IsAnimating && !selectedCell.IsMoving)
             {
                 selectedCell = null;
                 movedCell = null;
@@ -240,6 +243,10 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+            //Debug.Log("MouseDown");
+            if (Time.time - lastClickTime < clickCooldown) return; // Prevent double-click
+            lastClickTime = Time.time;
+
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
             RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
@@ -258,6 +265,7 @@ public class GameManager : MonoBehaviour
         }
         else if (Input.GetMouseButton(0))
         {
+            //Debug.Log("Mouse held");
             if (selectedCell == null) return;
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
@@ -266,6 +274,7 @@ public class GameManager : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0))
         {
+            //Debug.Log("Mouse Up");
             if (selectedCell == null) return;
 
             canMove = false;
@@ -295,6 +304,7 @@ public class GameManager : MonoBehaviour
             moveNum++;
             _movesText.text = moveNum.ToString();
         }
+
     }
 
     private void CheckWin()

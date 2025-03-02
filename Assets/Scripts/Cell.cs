@@ -6,6 +6,7 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     [HideInInspector] public Vector2Int Position;
+    [HideInInspector] public bool IsMoving;
 
     private Vector3 _transPosition;
     public Vector3 TransPosition
@@ -29,6 +30,17 @@ public class Cell : MonoBehaviour
     public bool IsStartMovePlaying => startMoveAnimation.IsActive();
     public bool hasSelectedMoveFinished => !selectedMoveAnimation.IsActive();
     public bool hasMoveFinished => !moveAnimation.IsActive();
+
+    public bool IsAnimating
+    {
+        get
+        {
+            return startAnimation.IsActive() ||
+                startMoveAnimation.IsActive() ||
+                selectedMoveAnimation.IsActive() ||
+                moveAnimation.IsActive();
+        }
+    }
 
     [SerializeField] private SpriteRenderer _bgSprite;
     [SerializeField] private SpriteRenderer _borderSprite;
@@ -83,6 +95,7 @@ public class Cell : MonoBehaviour
 
     public void AnimateStartPosition()
     {
+        CompleteAllAnimations();
         startMoveAnimation = transform.DOLocalMove(
             new Vector3(TransPosition.x, TransPosition.y, 0), _startMoveAnimationTime);
         startMoveAnimation.SetEase(Ease.InSine);
@@ -91,12 +104,18 @@ public class Cell : MonoBehaviour
 
     public void SelectedMoveStart()
     {
+        //Debug.Log("SelectedMoveStart");
+        IsMoving = true;
+        CompleteAllAnimations();
         _bgSprite.sortingOrder = FRONT;
-        transform.localScale = Vector3.one * 1.2f;
+        startMoveAnimation = transform.DOScale(1.1f, 0.2f);
+        startMoveAnimation.SetEase(Ease.OutSine);
+        startMoveAnimation.Play();
     }
 
     public void SelectedMove(Vector2 offset)
     {
+        IsMoving = true;
         transform.localPosition = TransPosition + (Vector3)offset;
         float minX = 0f;
         float maxX = GameManager.Cols * SpriteHeight - SpriteHeight;
@@ -124,6 +143,9 @@ public class Cell : MonoBehaviour
 
     public void SelectedMoveEnd()
     {
+        //Debug.Log("SelectedMoveEnd");   
+        IsMoving = false;
+        CompleteAllAnimations();
         selectedMoveAnimation = transform.DOLocalMove(
             new Vector3(TransPosition.x, TransPosition.y, 0f),
             _selectedMoveAnimationTime
@@ -131,13 +153,17 @@ public class Cell : MonoBehaviour
         selectedMoveAnimation.onComplete = () =>
         {
             _bgSprite.sortingOrder = BACK;
-            transform.localScale = Vector3.one;
+            startMoveAnimation = transform.DOScale(1f, 0.2f);
+            startMoveAnimation.SetEase(Ease.OutSine);
+            startMoveAnimation.Play();
         };
         selectedMoveAnimation.Play();
     }
 
     public void MoveEnd()
     {
+        //Debug.Log("MoveEnd");
+        CompleteAllAnimations();
         _bgSprite.sortingOrder = FRONT;
         moveAnimation = transform.DOLocalMove(
             new Vector3(TransPosition.x, TransPosition.y, 0f),
@@ -148,5 +174,14 @@ public class Cell : MonoBehaviour
             _bgSprite.sortingOrder = BACK;
         };
         moveAnimation.Play();
+    }
+
+    void CompleteAllAnimations()
+    {
+        startAnimation?.Complete(true);
+        spriteAnimation?.Complete(true);
+        startMoveAnimation?.Complete(true);
+        selectedMoveAnimation?.Complete(true);
+        moveAnimation?.Complete(true);
     }
 }
