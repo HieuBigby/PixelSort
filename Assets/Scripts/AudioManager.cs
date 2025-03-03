@@ -9,7 +9,13 @@ public class AudioManager : MonoBehaviour
     private AudioSource _effectSource;
 
     [SerializeField]
+    private AudioSource _musicSource; // New AudioSource for music
+
+    [SerializeField]
     private AudioClip _clickSound;
+
+    [SerializeField]
+    private AudioClip _backgroundMusic; // New AudioClip for background music
 
     private bool isSoundMuted;
     private bool IsSoundMuted
@@ -41,8 +47,10 @@ public class AudioManager : MonoBehaviour
         }
 
         PlayerPrefs.SetInt(Constants.Data.SETTINGS_SOUND, IsSoundMuted ? 0 : 1);
-        _effectSource.mute = IsSoundMuted;      
+        _effectSource.mute = IsSoundMuted;
+        _musicSource.mute = IsSoundMuted; // Mute music if sound is muted
 
+        PlayMusic(_backgroundMusic); // Start playing background music
     }
 
     public void AddButtonSound()
@@ -50,7 +58,8 @@ public class AudioManager : MonoBehaviour
         var buttons = FindObjectsOfType<Button>(true);
         for (int i = 0; i < buttons.Length; i++)
         {
-            buttons[i].onClick.AddListener(() => {
+            buttons[i].onClick.AddListener(() =>
+            {
                 PlaySound(_clickSound);
             });
         }
@@ -64,5 +73,24 @@ public class AudioManager : MonoBehaviour
     public void ToggleSound()
     {
         _effectSource.mute = IsSoundMuted;
+        _musicSource.mute = IsSoundMuted; // Mute/unmute music
+    }
+
+    public void PlayMusic(AudioClip clip)
+    {
+        if (_musicSource.clip == clip) return; // Avoid restarting the same music
+        _musicSource.clip = clip;
+        _musicSource.loop = true; // Loop the music
+        _musicSource.Play();
+    }
+
+    public void PauseMusic()
+    {
+        _musicSource.Pause();
+    }
+
+    public void StopMusic()
+    {
+        _musicSource.Stop();
     }
 }
