@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float screenHeightRatio;
     [SerializeField] private RectTransform transNotiFinish;
     [SerializeField] private GameObject objReplayButton;
+    [SerializeField] private AudioClip audioSwap;
 
     private Level _currentlevelData;
     private int levelNum;
@@ -60,13 +61,14 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        AudioManager.Instance.AddButtonSound();
         transNotiFinish.gameObject.SetActive(false);
         objReplayButton.SetActive(false);
 
-        levelNum = PlayerPrefs.GetInt("Level", 1);
+        levelNum = PlayerPrefs.GetInt(Constants.Data.LEVEL, 1);
         LoadLevel(levelNum);
         moveNum = 0;
-        bestNum = PlayerPrefs.GetInt("Best" + levelNum.ToString(), 0);
+        bestNum = PlayerPrefs.GetInt(Constants.Data.HIGH_SCORE + levelNum.ToString(), 0);
         _levelText.text = levelNum.ToString();
         _movesText.text = moveNum.ToString();
         _bestText.text = bestNum.ToString();
@@ -303,6 +305,7 @@ public class GameManager : MonoBehaviour
 
             selectedCell.SelectedMoveEnd();
             movedCell.MoveEnd();
+            AudioManager.Instance.PlaySound(audioSwap);
 
             moveNum++;
             _movesText.text = moveNum.ToString();
@@ -326,11 +329,11 @@ public class GameManager : MonoBehaviour
         {
             bestNum = moveNum;
         }
-        PlayerPrefs.SetInt("Best" + levelNum.ToString(), bestNum);
+        PlayerPrefs.SetInt(Constants.Data.HIGH_SCORE + levelNum.ToString(), bestNum);
         _bestText.text = bestNum.ToString();
         if (levelNum < _curLevels.Count)
         {
-            PlayerPrefs.SetInt("Level", levelNum + 1);
+            PlayerPrefs.SetInt(Constants.Data.LEVEL, levelNum + 1);
         }
 
         _nextButtonTransform.gameObject.SetActive(true);
