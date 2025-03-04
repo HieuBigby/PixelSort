@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
         canStartClicking = false;
         hasGameStarted = false;
         lastClickTime = -clickCooldown; // Initialize to allow immediate first click
+        Application.targetFrameRate = 60;
     }
 
     private void Start()
