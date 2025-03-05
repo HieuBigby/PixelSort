@@ -92,17 +92,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf8c730918ecb7546b827c3f62302924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Color: {r: 0, g: 0, b: 0, a: 0}
   Position: {x: 0, y: 0}
+  IsMoving: 0
   _bgSprite: {fileID: 6167380476029012049}
   _borderSprite: {fileID: 3829905851495376453}
   _boxCollider: {fileID: 565712947897738216}
   _imgScale: 0.95
+  _borderScale: 1.3
   _startScaleDelay: 0.04
   _startScaleTime: 0.2
   _startMoveAnimationTime: 0.32
   _selectedMoveAnimationTime: 0.16
   _moveAnimationTime: 0.32
+  sfxWin: {fileID: 8300000, guid: 71ac76acdc906b24bb226ef094c202de, type: 3}
 --- !u!1 &4834195366040856450
 GameObject:
   m_ObjectHideFlags: 0

@@ -2262,10 +2262,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66bcb8bf8deab5d4fb157bf69c1bb038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  testLevel: 0
+  cellGridHelp: 0
   _curLevels:
   - {fileID: 11400000, guid: 787dab351b6c8554db48bee717a273e6, type: 2}
   - {fileID: 11400000, guid: ced8b90b0698ac4499137e11f180a755, type: 2}
   - {fileID: 11400000, guid: 20a74c854b7180747abad68d5fd4f0e5, type: 2}
+  - {fileID: 11400000, guid: f5b8727c625763649a6471bcb53cfcaf, type: 2}
+  - {fileID: 11400000, guid: c7b83ac01d7f1574682d7c4297a005fe, type: 2}
   _levelText: {fileID: 1614397989}
   _movesText: {fileID: 1239707505}
   _bestText: {fileID: 547755015}
@@ -2275,10 +2279,11 @@ MonoBehaviour:
   _nextButtonTransform: {fileID: 1020206534}
   _cellPrefab: {fileID: 565712947897738217, guid: f22d109d7ec8b23408bdc472dac20486, type: 3}
   screenScaleFactor: 0.95
-  screenHeightRatio: 0.6
+  screenHeightRatio: 0.5
   transNotiFinish: {fileID: 241295740}
   objReplayButton: {fileID: 2026935231}
   audioSwap: {fileID: 8300000, guid: 2eb4878fd24c68a408a2d7db73b69393, type: 3}
+  sfxWin: {fileID: 8300000, guid: 71ac76acdc906b24bb226ef094c202de, type: 3}
 --- !u!1 &1815002926
 GameObject:
   m_ObjectHideFlags: 0

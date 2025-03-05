@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
     public static int Rows;
     public static int Cols;
 
+    public int testLevel;
+    public bool cellGridHelp;
+
     [SerializeField] private List<Level> _curLevels;
     [SerializeField] private TMP_Text _levelText;
     [SerializeField] private TMP_Text _movesText;
@@ -26,6 +29,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private RectTransform transNotiFinish;
     [SerializeField] private GameObject objReplayButton;
     [SerializeField] private AudioClip audioSwap;
+    [SerializeField] private AudioClip sfxWin;
 
     private Level _currentlevelData;
     private int levelNum;
@@ -66,7 +70,7 @@ public class GameManager : MonoBehaviour
         transNotiFinish.gameObject.SetActive(false);
         objReplayButton.SetActive(false);
 
-        levelNum = PlayerPrefs.GetInt(Constants.Data.LEVEL, 1);
+        levelNum = testLevel != 0 ? testLevel : PlayerPrefs.GetInt(Constants.Data.LEVEL, 1);
         LoadLevel(levelNum);
         moveNum = 0;
         bestNum = PlayerPrefs.GetInt(Constants.Data.HIGH_SCORE + levelNum.ToString(), 0);
@@ -138,6 +142,7 @@ public class GameManager : MonoBehaviour
 
                 cells[x, y] = Instantiate(_cellPrefab, _gridParent);
                 cells[x, y].Init(imgPieces[x, y], y, x, posX, posY);
+                cells[x, y].ShowBorder(_currentlevelData.LockedCells.Contains(new Vector2Int(x, y)));
                 cells[x, y].name = $"Cell_{x}x{y}";
                 correctCells[x, y] = cells[x, y];
             }
@@ -218,6 +223,20 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if (cellGridHelp)
+        {
+            if(Input.GetMouseButtonDown(0))
+            {
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
+                RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
+                if (hit && hit.collider.TryGetComponent(out selectedCell))
+                {
+                    Debug.Log($"Chạm vào ô {selectedCell.Position.y}, {selectedCell.Position.x}");
+                }
+            }
+        }
+
         if (hasGameFinished) return;
 
         if (!hasGameStarted) return;
@@ -236,7 +255,7 @@ public class GameManager : MonoBehaviour
             canMove = true;
         }
 
-        if (!canMove)
+        if (!canMove && selectedCell)
         {
             if (!selectedCell.IsAnimating && !movedCell.IsAnimating && !selectedCell.IsMoving)
             {
@@ -258,9 +277,8 @@ public class GameManager : MonoBehaviour
             RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
             if (hit && hit.collider.TryGetComponent(out selectedCell))
             {
-                if (_currentlevelData.LockedCells.Contains(
-                    new Vector2Int(selectedCell.Position.y, selectedCell.Position.x)
-                    ))
+                if (_currentlevelData.LockedCells
+                .Contains(new Vector2Int(selectedCell.Position.y, selectedCell.Position.x)))
                 {
                     selectedCell = null;
                     return;
@@ -326,6 +344,7 @@ public class GameManager : MonoBehaviour
         }
 
         hasGameFinished = true;
+        objReplayButton.SetActive(false);
         if (bestNum == 0 || bestNum > moveNum)
         {
             bestNum = moveNum;
@@ -343,6 +362,7 @@ public class GameManager : MonoBehaviour
             .SetEase(Ease.Linear)
             .SetLoops(-1, LoopType.Yoyo);
         playNextTween.Play();
+        AudioManager.Instance.PlaySound(sfxWin);
 
         for (int i = 0; i < Rows; i++)
         {

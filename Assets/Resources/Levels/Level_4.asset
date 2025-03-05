@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9fe1710532e2f6e4ca3ec4899e116dba, type: 3}
-  m_Name: Level_3
+  m_Name: Level_4
   m_EditorClassIdentifier: 
-  BackGroundColor: {r: 1, g: 0.4117647, b: 0.5176471, a: 1}
-  ImageSprite: {fileID: 21300000, guid: 4fe99db3d4d56114c91067c372fe248f, type: 3}
+  BackGroundColor: {r: 0.4627451, g: 0.3764706, b: 0.3372549, a: 1}
+  ImageSprite: {fileID: 21300000, guid: 8f5262d4973dbd84f84ce2936bad67d4, type: 3}
   Row: 5
   Col: 5
   LockedCells:
-  - {x: 0, y: 0}
-  - {x: 0, y: 4}
-  - {x: 4, y: 0}
+  - {x: 3, y: 0}
+  - {x: 1, y: 4}
   - {x: 4, y: 4}
+  - {x: 0, y: 0}

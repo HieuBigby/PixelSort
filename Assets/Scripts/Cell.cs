@@ -46,6 +46,7 @@ public class Cell : MonoBehaviour
     [SerializeField] private SpriteRenderer _borderSprite;
     [SerializeField] private BoxCollider2D _boxCollider;
     [SerializeField] private float _imgScale = 0.75f;
+    [SerializeField] private float _borderScale = 1.3f;
     [SerializeField] private float _startScaleDelay = 0.04f;
     [SerializeField] private float _startScaleTime = 0.2f;
     [SerializeField] private float _startMoveAnimationTime = 0.32f;
@@ -66,7 +67,8 @@ public class Cell : MonoBehaviour
         _bgSprite.sprite = sprite;
         _boxCollider.size = _bgSprite.bounds.size;
         _bgSprite.transform.localScale = Vector3.one * _imgScale;
-        _borderSprite.size = _bgSprite.bounds.size;
+        _borderSprite.transform.localScale = _bgSprite.bounds.size * _borderScale;
+        ShowBorder(false);
 
         Position = new Vector2Int(x, y);
         transform.localPosition = new Vector3(posX, posY, 0);
@@ -78,9 +80,15 @@ public class Cell : MonoBehaviour
         startAnimation.Play();
     }
 
+    public void ShowBorder(bool value)
+    {
+        _borderSprite.gameObject.SetActive(value);
+    }
+
     public void GameFinished()
     {
         transform.localScale = Vector3.one;
+        ShowBorder(false);
         spriteAnimation = _bgSprite.transform.DOScale(1f, _startScaleTime);
         spriteAnimation.SetEase(Ease.OutSine);
         spriteAnimation.Play();
